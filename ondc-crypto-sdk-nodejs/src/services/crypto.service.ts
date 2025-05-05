@@ -64,18 +64,12 @@ export class CryptoService {
       }
 
       const decipher = crypto.createDecipheriv('aes-256-ecb', this.aesKey, Buffer.alloc(0));
-      decipher.setAutoPadding(false); // Handle padding manually
+      decipher.setAutoPadding(true); // Handle padding manually
 
       let decrypted = decipher.update(encrypted, 'base64', 'utf8');
       decrypted += decipher.final('utf8');
-
-      // Remove PKCS7 padding manually
-      const pad = decrypted.charCodeAt(decrypted.length - 1);
-      if (pad < 1 || pad > 16) {
-        throw new Error('Invalid padding');
-      }
-      
-      return decrypted.slice(0, -pad);
+      console.log('Decrypted data:', decrypted);
+      return decrypted;
     } catch (error) {
       console.error('Decryption failed:', {
         aesKey: this.aesKey.toString('base64'),

@@ -18,6 +18,7 @@ export class SubscriptionController {
       }
 
       const answer = this.cryptoService.decryptAES256ECB(challenge);
+      console.log('Answer:', answer);
       return res.status(200).json({ answer });
       
     } catch (error) {
