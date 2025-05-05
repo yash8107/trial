@@ -25,15 +25,15 @@ export class CryptoService {
 
   decryptAES256ECB(encrypted: string): string {
     try {
-      // Use the encryption config key directly
-      const key = Buffer.from(encryptionConfig.Encryption_Privatekey, 'base64');
-      
-      // Ensure key is exactly 32 bytes for AES-256
-      const decipher = crypto.createDecipheriv('aes-256-ecb', key.slice(0, 32), Buffer.alloc(0));
+      console.log('Shared Key:', this.sharedKey);
+      console.log('Encrypted Data:', encrypted);
+      const decipher = crypto.createDecipheriv('aes-256-ecb', this.sharedKey, null); // null IV for ECB Mode
       decipher.setAutoPadding(true);
+      console.log('Decipher:', decipher);
       
       let decrypted = decipher.update(encrypted, 'base64', 'utf8');
       decrypted += decipher.final('utf8');
+      console.log('Decrypted Data:', decrypted);
       
       return decrypted;
     } catch (error) {
