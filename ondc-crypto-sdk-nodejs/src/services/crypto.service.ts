@@ -4,11 +4,9 @@ import * as crypto from 'crypto';
 
 export class CryptoService {
   private encryptionPrivateKey: string;
-  private encryptionPublicKey: string;
 
   constructor() {
     this.encryptionPrivateKey = encryptionConfig.Encryption_Privatekey;
-    this.encryptionPublicKey = encryptionConfig.Encryption_Publickey;
   }
 
   async decryptChallenge(encryptedChallenge: string): Promise<string> {
