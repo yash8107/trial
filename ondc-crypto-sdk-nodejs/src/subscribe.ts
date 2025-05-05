@@ -2,14 +2,10 @@ import axios from 'axios';
 import { createAuthorizationHeader } from './utility';
 import { format } from 'date-fns';
 
-// Your private key - replace this with your actual private private key
-// const PRIVATE_KEY = "NvR+zC8lk+Ctj61xxFEjbg3QyY3iJkS370M/xurRpa2T/c89ILrcFUJSa5nHVLCGXRMP6FZiKQSlXStQwC077w==";
-// const SUBSCRIBER_ID = "api.sellerfocus.xyz";
-// const UNIQUE_KEY_ID = "41391d6a-05e1-4967-803d-1a60a2d43d59";
-
-const PRIVATE_KEY = "TndbG8PV65HRlvkLDxcEb2weAedEaSGK3FZ4H2NRaf4wieJbMY5aYV6EDhUVrgGmNP/0jUqhTSpj//dzIwzdmA==";
+// Your private key - replace this with your actual private key
+const PRIVATE_KEY = "NvR+zC8lk+Ctj61xxFEjbg3QyY3iJkS370M/xurRpa2T/c89ILrcFUJSa5nHVLCGXRMP6FZiKQSlXStQwC077w==";
 const SUBSCRIBER_ID = "api.sellerfocus.xyz";
-const UNIQUE_KEY_ID = "911d250b-20c2-4944-bd25-2254467adc1e";
+const UNIQUE_KEY_ID = "41391d6a-05e1-4967-803d-1a60a2d43d59";
 
 async function createSubscriptionRequest() {
     try {
@@ -48,8 +44,8 @@ const formattedTimestamp = currentTime.toISOString(); // This gives "2023-10-05T
                     unique_key_id: UNIQUE_KEY_ID,
                     callback_url: "/",
                     key_pair: {
-                        signing_public_key: "MIniWzGOWmFehA4VFa4BpjT/9I1KoU0qY//3cyMM3Zg=",
-                        encryption_public_key: "MCowBQYDK2VuAyEA4eXX5R2ForQkbQ84tsgJWo2rJNaTN5w1pXU6b5ub+Tg=",
+                        signing_public_key: "k/3PPSC63BVCUmuZx1Swhl0TD+hWYikEpV0rUMAtO+8=",
+                        encryption_public_key: "MCowBQYDK2VuAyEA817tuDx8zi+WCwJpOVZmvgXOLoFmEftyEoFMB0VQQhQ=",
                         valid_from: new Date().toISOString(), 
                         valid_until: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
                     }
