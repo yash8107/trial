@@ -1,4 +1,3 @@
-
 import nacl from 'tweetnacl';
 import { encryptionConfig } from '../types/index'; // Assuming your config path is correct
 import * as crypto from 'crypto'; // Import crypto for key parsing
@@ -24,13 +23,38 @@ export class CryptoService {
             if (!privateKeyInput) {
                 throw new Error('Encryption_Privatekey is missing in the configuration.');
             }
-            const privateKeyObject = crypto.createPrivateKey(privateKeyInput);
+
+            let privateKeyObject: crypto.KeyObject;
+
+            // Attempt to parse directly (should work for standard PEM)
+            try {
+                privateKeyObject = crypto.createPrivateKey(privateKeyInput);
+                console.log('Private key parsed directly (likely PEM format).');
+            } catch (directError) {
+                // If direct parsing fails, assume it might be a base64 encoded DER string
+                console.warn(`Direct private key parsing failed (${directError instanceof Error ? directError.message : directError}). Attempting Base64 DER parsing...`);
+                try {
+                    const privateKeyDerBuffer = Buffer.from(privateKeyInput, 'base64');
+                    // Explicitly tell crypto to parse the buffer as DER/PKCS#8
+                    privateKeyObject = crypto.createPrivateKey({
+                        key: privateKeyDerBuffer,
+                        format: 'der',
+                        type: 'pkcs8' // Standard format for private keys, including Curve25519
+                    });
+                    console.log('Private key parsed successfully as Base64 DER.');
+                } catch (derError) {
+                    console.error('Failed to parse private key using both direct (PEM) and Base64 DER methods.');
+                    // Throw a more informative error if both attempts fail
+                    throw new Error(`Failed to parse private key. Direct/PEM error: ${directError instanceof Error ? directError.message : directError}. Base64/DER error: ${derError instanceof Error ? derError.message : derError}`);
+                }
+            }
 
             // Export as JWK to safely extract raw key material for Curve25519/X25519
             const jwk = privateKeyObject.export({ format: 'jwk' });
 
             if (!jwk.d) {
-                throw new Error('Could not extract raw private key (d component) from JWK. Ensure the key is for Curve25519/X25519.');
+                // If 'd' is missing, the key wasn't parsed correctly or isn't a private key
+                throw new Error('Could not extract raw private key (d component) from JWK. Ensure the key is for Curve25519/X25519 and was parsed correctly.');
             }
 
             this.rawPrivateKeyBytes = base64UrlDecode(jwk.d);
@@ -39,7 +63,7 @@ export class CryptoService {
             if (this.rawPrivateKeyBytes.length !== nacl.box.secretKeyLength) {
                  throw new Error(`Extracted private key has incorrect length: ${this.rawPrivateKeyBytes.length}. Expected ${nacl.box.secretKeyLength}.`);
             }
-            console.log('Raw private key loaded successfully.');
+            console.log('Raw private key loaded and validated successfully.');
 
         } catch(error) {
             console.error("Error loading/parsing private key:", error);
@@ -55,16 +79,18 @@ export class CryptoService {
 
              // --- ONDC Public Key Parsing ---
             // This is the SubjectPublicKeyInfo (SPKI) in base64 DER format you provided
-            const ondcPublicKeyBase64Der = "MCowBQYDK2VuAyEAduMuZgmtpjdCuxv+Nc49K0cB6tL/Dj3HZetvVN7ZekM="; 
+            // Ensure this is the correct ONDC public key corresponding to their encryption private key.
+            const ondcPublicKeyBase64Der = "MCowBQYDK2VuAyEAduMuZgmtpjdCuxv+Nc49K0cB6tL/Dj3HZetvVN7ZekM=";
             let rawOndcPublicKeyBytes: Buffer;
             try {
                 // Decode base64 and parse the DER/SPKI structure
                 const publicKeyDerBuffer = Buffer.from(ondcPublicKeyBase64Der, 'base64');
                 const publicKeyObject = crypto.createPublicKey({ key: publicKeyDerBuffer, format: 'der', type: 'spki' });
-                
+
                 // Export as JWK to safely extract raw key material for Curve25519/X25519
                 const pubJwk = publicKeyObject.export({ format: 'jwk' });
                 if (!pubJwk.x) {
+                     // If 'x' is missing, the key wasn't parsed correctly or isn't a public key
                      throw new Error('Could not extract raw public key (x component) from JWK. Ensure ONDC key is for Curve25519/X25519.');
                 }
                 rawOndcPublicKeyBytes = base64UrlDecode(pubJwk.x);
@@ -106,7 +132,7 @@ export class CryptoService {
             // Check if decryption was successful
             if (!decryptedBuffer) {
                  console.error('Decryption failed! nacl.box.open returned null. Check keys, nonce, and ciphertext integrity.');
-                 // It might be a wrong ONDC key, wrong private key, wrong nonce, or corrupted ciphertext
+                 // Common causes: wrong ONDC public key, wrong private key, incorrect nonce/ciphertext splitting, corrupted data.
                  throw new Error('Decryption failed - nacl.box.open returned null.');
             }
 
