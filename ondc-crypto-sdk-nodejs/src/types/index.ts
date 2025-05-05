@@ -112,12 +112,13 @@ export interface EncryptionKeys {
 //   valid_from: '2025-05-05T13:11:13.021Z',
 //   valid_until: '2026-05-05T13:11:13.021Z'
 // };
+
 export const encryptionConfig: EncryptionKeys = {
-  unique_key_id: '628e0e88-98e7-482c-bd21-bd54faca54ad',
-  Signing_private_key: 'HEScpPjRWOqCjKhQuYD+t7D1o2mTz4Jh9GGiFY/5/B9D1n4/xmduMlWuzcPb6afzRZt5K4VWi3/Rmc6znW6WgQ==',
-  Signing_public_key: 'Q9Z+P8ZnbjJVrs3D2+mn80WbeSuFVot/0ZnOs51uloE=',
-  Encryption_Privatekey: 'KOJ9JMN2BE4GB4xSLmUFwrbeDQP91kXOl/hJ52VES1s=',
-  Encryption_Publickey: 'ki+bI5X4cpNUhFDmCZrbWZRKCzst/DaLs7hxHSYhbFc=',
-  valid_from: '2025-05-05T20:06:28.821Z',
-  valid_until: '2026-05-05T20:06:28.821Z'
+  unique_key_id: 'bb2de03a-bda1-458f-b27b-6919788da886',
+  Signing_private_key: '9sfCszmFVgrlzdxED3tfPtohk9FkcspnnooySJ8RxIBDWIdGg48zK4MM4Yq8gDwa5RbUZiXzAPQQ2LCiyXGBEQ==',
+  Signing_public_key: 'Q1iHRoOPMyuDDOGKvIA8GuUW1GYl8wD0ENiwoslxgRE=',
+  Encryption_Privatekey: 'MC4CAQAwBQYDK2VuBCIEIJCidZJ8WBezDoz145R0r8NL61U9XOSdDG5Vz5RZ62BC',
+  Encryption_Publickey: 'MCowBQYDK2VuAyEAbg59g4rH4ppMce1Oy4874F4QxdzdKygZh6jlDo12xUE=',
+  valid_from: '2025-05-05T20:16:59.764Z',
+  valid_until: '2026-05-05T20:16:59.764Z'
 };

@@ -3,9 +3,9 @@ import { createAuthorizationHeader } from './utility';
 import { format } from 'date-fns';
 
 // Your private key - replace this with your actual private key
-const PRIVATE_KEY = "HEScpPjRWOqCjKhQuYD+t7D1o2mTz4Jh9GGiFY/5/B9D1n4/xmduMlWuzcPb6afzRZt5K4VWi3/Rmc6znW6WgQ==";
+const PRIVATE_KEY = "9sfCszmFVgrlzdxED3tfPtohk9FkcspnnooySJ8RxIBDWIdGg48zK4MM4Yq8gDwa5RbUZiXzAPQQ2LCiyXGBEQ==";
 const SUBSCRIBER_ID = "api.sellerfocus.xyz";
-const UNIQUE_KEY_ID = "628e0e88-98e7-482c-bd21-bd54faca54ad";
+const UNIQUE_KEY_ID = "bb2de03a-bda1-458f-b27b-6919788da886";
 
 async function createSubscriptionRequest() {
     try {
@@ -44,8 +44,8 @@ const formattedTimestamp = currentTime.toISOString(); // This gives "2023-10-05T
                     unique_key_id: UNIQUE_KEY_ID,
                     callback_url: "/",
                     key_pair: {
-                        signing_public_key: "Q9Z+P8ZnbjJVrs3D2+mn80WbeSuFVot/0ZnOs51uloE=",
-                        encryption_public_key: "ki+bI5X4cpNUhFDmCZrbWZRKCzst/DaLs7hxHSYhbFc=",
+                        signing_public_key: "Q1iHRoOPMyuDDOGKvIA8GuUW1GYl8wD0ENiwoslxgRE=",
+                        encryption_public_key: "MCowBQYDK2VuAyEAbg59g4rH4ppMce1Oy4874F4QxdzdKygZh6jlDo12xUE=",
                         valid_from: new Date().toISOString(), 
                         valid_until: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
                     }
