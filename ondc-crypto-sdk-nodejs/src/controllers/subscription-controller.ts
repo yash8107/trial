@@ -17,7 +17,7 @@ export class SubscriptionController {
         return res.status(400).json({ error: 'Missing challenge parameter' });
       }
 
-      const answer = this.cryptoService.decryptAES256ECB(challenge);
+      const answer = await this.cryptoService.decryptChallenge(challenge);
       console.log('Answer:', answer);
       return res.status(200).json({ answer });
       
