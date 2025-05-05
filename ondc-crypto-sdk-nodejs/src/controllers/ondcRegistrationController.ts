@@ -7,14 +7,16 @@ export class OndcRegistrationController {
       console.log('Site Verification Endpoint Called');
 
       // Load keys from environment variables
-      const signingPrivateKey = 'NvR+zC8lk+Ctj61xxFEjbg3QyY3iJkS370M/xurRpa2T/c89ILrcFUJSa5nHVLCGXRMP6FZiKQSlXStQwC077w==';
+      // const signingPrivateKey = 'NvR+zC8lk+Ctj61xxFEjbg3QyY3iJkS370M/xurRpa2T/c89ILrcFUJSa5nHVLCGXRMP6FZiKQSlXStQwC077w==';
+      const signingPrivateKey = "TndbG8PV65HRlvkLDxcEb2weAedEaSGK3FZ4H2NRaf4wieJbMY5aYV6EDhUVrgGmNP/0jUqhTSpj//dzIwzdmA==";
 
       if (!signingPrivateKey) {
         throw new Error('No signing private key found. Generate keys first.');
       }
 
       // Generate a unique request ID
-      const requestId = "41391d6a-05e1-4967-803d-1a60a2d43d59";
+      // const requestId = "41391d6a-05e1-4967-803d-1a60a2d43d59";
+      const requestId = "911d250b-20c2-4944-bd25-2254467adc1e";
 
       // Wait for sodium to be ready
       await sodium.ready;
