@@ -19,8 +19,10 @@ export class CryptoService {
     const privateKeyRaw = this.extractRawPrivateKeyFromDER(this.encryptionPrivateKey);
     const publicKeyRaw = this.extractRawPublicKeyFromDER(this.encryptionPublicKey);
 
-    console.log('Private key:', privateKeyRaw);
-    console.log('Public key:', publicKeyRaw);
+    // Log the keys being used for decryption
+    console.log('Attempting decryption with keys:');
+    console.log('Private key:', Buffer.from(privateKeyRaw).toString('base64'));
+    console.log('Public key:', Buffer.from(publicKeyRaw).toString('base64'));
 
     // Must be 32 bytes each
     if (privateKeyRaw.length !== 32 || publicKeyRaw.length !== 32) {
