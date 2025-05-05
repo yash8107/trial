@@ -1,67 +1,113 @@
-import nacl from 'tweetnacl'; // <-- Add this import
-import { encryptionConfig } from '../types/index'; // Assuming your config path
+
+import nacl from 'tweetnacl';
+import { encryptionConfig } from '../types/index'; // Assuming your config path is correct
+import * as crypto from 'crypto'; // Import crypto for key parsing
+
+// Helper function for base64url decoding (used for JWK format)
+function base64UrlDecode(base64urlString: string): Buffer {
+    let base64 = base64urlString.replace(/-/g, '+').replace(/_/g, '/');
+    // Pad with '=' signs if necessary
+    while (base64.length % 4) {
+        base64 += '=';
+    }
+    return Buffer.from(base64, 'base64');
+}
 
 export class CryptoService {
-    private encryptionPrivateKey: string;
+    // Store the raw private key bytes (32 bytes for Curve25519)
+    private rawPrivateKeyBytes: Buffer;
 
     constructor() {
-        // Ensure the private key is base64 decoded if it's stored that way
-        this.encryptionPrivateKey = Buffer.from(encryptionConfig.Encryption_Privatekey, 'base64').toString('binary'); 
+        try {
+            // Assume Encryption_Privatekey is a PEM string or a base64 encoded DER string
+            const privateKeyInput = encryptionConfig.Encryption_Privatekey;
+            if (!privateKeyInput) {
+                throw new Error('Encryption_Privatekey is missing in the configuration.');
+            }
+            const privateKeyObject = crypto.createPrivateKey(privateKeyInput);
+
+            // Export as JWK to safely extract raw key material for Curve25519/X25519
+            const jwk = privateKeyObject.export({ format: 'jwk' });
+
+            if (!jwk.d) {
+                throw new Error('Could not extract raw private key (d component) from JWK. Ensure the key is for Curve25519/X25519.');
+            }
+
+            this.rawPrivateKeyBytes = base64UrlDecode(jwk.d);
+
+            // Validate key length for nacl.box
+            if (this.rawPrivateKeyBytes.length !== nacl.box.secretKeyLength) {
+                 throw new Error(`Extracted private key has incorrect length: ${this.rawPrivateKeyBytes.length}. Expected ${nacl.box.secretKeyLength}.`);
+            }
+            console.log('Raw private key loaded successfully.');
+
+        } catch(error) {
+            console.error("Error loading/parsing private key:", error);
+            // Rethrow to prevent service from starting in a bad state
+            throw new Error(`Failed to initialize CryptoService with private key: ${error instanceof Error ? error.message : error}`);
+        }
     }
 
     async decryptChallenge(encryptedChallenge: string): Promise<string> {
         try {
             console.log('Encrypted challenge (base64):', encryptedChallenge);
-
             const encryptedBuffer = Buffer.from(encryptedChallenge, 'base64');
-            
-            // ONDC typically sends the ephemeral public key and nonce along with the ciphertext.
-            // You'll need to parse these from the incoming request structure.
-            // The exact structure depends on how ONDC sends the encrypted challenge.
-            // Let's assume for now it's a simple structure you need to adapt:
-            // { nonce: "base64Nonce", ephemeralPublicKey: "base64PubKey", ciphertext: "base64Cipher" }
-            // This is a GUESS - you MUST verify the actual structure from ONDC docs or logs.
 
-            // Placeholder: Replace with actual parsing logic based on ONDC's format
-            // const { nonce, ephemeralPublicKey, ciphertext } = parseEncryptedData(encryptedBuffer); 
-            
-            // Example of parsing if it's just raw encrypted data (less likely for ECDH schemes)
-            // This part needs verification based on ONDC's actual encryption method.
-            // If they encrypt *directly* with your public key (less common for Curve25519), 
-            // the decryption might be different.
-            
-            // *** THIS SECTION IS HIGHLY SPECULATIVE without knowing ONDC's exact method ***
-            // Assuming a common pattern using ephemeral keys and nonce (like NaCl box):
-            
-            // You'll need ONDC's *signing* public key here for verification, 
-            // OR their *encryption* public key if they use a direct box mechanism.
-            // Let's assume you have ONDC's public key stored somewhere (e.g., config)
-            const ondcPublicKeyBase64 = "MCowBQYDK2VuAyEAduMuZgmtpjdCuxv+Nc49K0cB6tL/Dj3HZetvVN7ZekM="; // Get this from ONDC
-            const ondcPublicKey = Buffer.from(ondcPublicKeyBase64, 'base64');
+             // --- ONDC Public Key Parsing ---
+            // This is the SubjectPublicKeyInfo (SPKI) in base64 DER format you provided
+            const ondcPublicKeyBase64Der = "MCowBQYDK2VuAyEAduMuZgmtpjdCuxv+Nc49K0cB6tL/Dj3HZetvVN7ZekM="; 
+            let rawOndcPublicKeyBytes: Buffer;
+            try {
+                // Decode base64 and parse the DER/SPKI structure
+                const publicKeyDerBuffer = Buffer.from(ondcPublicKeyBase64Der, 'base64');
+                const publicKeyObject = crypto.createPublicKey({ key: publicKeyDerBuffer, format: 'der', type: 'spki' });
+                
+                // Export as JWK to safely extract raw key material for Curve25519/X25519
+                const pubJwk = publicKeyObject.export({ format: 'jwk' });
+                if (!pubJwk.x) {
+                     throw new Error('Could not extract raw public key (x component) from JWK. Ensure ONDC key is for Curve25519/X25519.');
+                }
+                rawOndcPublicKeyBytes = base64UrlDecode(pubJwk.x);
 
-            const privateKeyBytes = Buffer.from(this.encryptionPrivateKey, 'binary'); 
-            
-            // Assuming a simplified scenario where 'encryptedChallenge' contains Nonce + Box
-            // This structure needs confirmation. Let's assume 24-byte nonce prefix.
-            const nonceBytes = encryptedBuffer.subarray(0, 24);
-            const ciphertextBytes = encryptedBuffer.subarray(24);
+            } catch (parseError) {
+                 console.error("Failed to parse ONDC public key:", parseError);
+                 throw new Error(`Invalid ONDC Public Key format or value: ${parseError instanceof Error ? parseError.message : parseError}`);
+            }
+
+             // Validate key length for nacl.box
+            if (rawOndcPublicKeyBytes.length !== nacl.box.publicKeyLength) {
+                throw new Error(`Extracted ONDC public key has incorrect length: ${rawOndcPublicKeyBytes.length}. Expected ${nacl.box.publicKeyLength}.`);
+            }
+             console.log('Raw ONDC public key loaded successfully.');
+            // --- End ONDC Public Key Parsing ---
+
+
+            // Assumption: The encrypted buffer contains: 24-byte nonce + ciphertext
+            // ** IMPORTANT: Verify this structure with ONDC documentation! **
+            if (encryptedBuffer.length <= nacl.box.nonceLength) {
+                 throw new Error(`Encrypted data (length ${encryptedBuffer.length}) is too short to contain nonce (length ${nacl.box.nonceLength}) and ciphertext.`);
+            }
+            const nonceBytes = encryptedBuffer.subarray(0, nacl.box.nonceLength);
+            const ciphertextBytes = encryptedBuffer.subarray(nacl.box.nonceLength);
 
             console.log('Nonce (Buffer):', nonceBytes);
             console.log('Ciphertext (Buffer):', ciphertextBytes);
-            console.log('Private Key (Buffer):', privateKeyBytes);
-            console.log('ONDC Public Key (Buffer):', ondcPublicKey);
+            console.log('Private Key (Raw Bytes):', this.rawPrivateKeyBytes); // Should be 32 bytes
+            console.log('ONDC Public Key (Raw Bytes):', rawOndcPublicKeyBytes); // Should be 32 bytes
 
-
+            // Perform decryption using raw keys
             const decryptedBuffer = nacl.box.open(
                 ciphertextBytes,
                 nonceBytes,
-                ondcPublicKey, // ONDC's Public Key
-                privateKeyBytes // Your Private Key
+                rawOndcPublicKeyBytes,    // Use raw 32-byte public key
+                this.rawPrivateKeyBytes    // Use raw 32-byte private key
             );
 
+            // Check if decryption was successful
             if (!decryptedBuffer) {
-                 console.error('Decryption failed! nacl.box.open returned null.');
-                 throw new Error('Decryption failed - likely incorrect key or corrupted data.');
+                 console.error('Decryption failed! nacl.box.open returned null. Check keys, nonce, and ciphertext integrity.');
+                 // It might be a wrong ONDC key, wrong private key, wrong nonce, or corrupted ciphertext
+                 throw new Error('Decryption failed - nacl.box.open returned null.');
             }
 
             const decryptedChallenge = Buffer.from(decryptedBuffer).toString('utf8');
@@ -69,17 +115,10 @@ export class CryptoService {
             return decryptedChallenge;
 
         } catch (error) {
-            console.error('Error decrypting challenge:', error);
-            // Provide more detail if possible
+            console.error('Error in decryptChallenge:', error);
+            // Ensure error is propagated correctly
             const errorMessage = error instanceof Error ? error.message : 'Unknown decryption error';
             throw new Error(`Failed to decrypt challenge: ${errorMessage}`);
         }
     }
-
-    // Helper to parse assumed structure - REPLACE WITH ACTUAL LOGIC
-    // parseEncryptedData(buffer: Buffer): { nonce: Buffer, ephemeralPublicKey: Buffer, ciphertext: Buffer } {
-    //    // Implement parsing logic based on how ONDC structures the encrypted payload
-    //    // Example: read lengths, then segments
-    //    throw new Error("Parsing logic not implemented - Adapt to ONDC's structure");
-    // }
 }
