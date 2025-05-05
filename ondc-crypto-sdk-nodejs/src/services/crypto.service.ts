@@ -25,12 +25,19 @@ export class CryptoService {
 
   decryptAES256ECB(encrypted: string): string {
     try {
-      const iv = Buffer.alloc(0);
-      const decipher = crypto.createDecipheriv('aes-256-ecb', this.sharedKey, iv);
+      // Use the encryption config key directly
+      const key = Buffer.from(encryptionConfig.Encryption_Privatekey, 'base64');
+      
+      // Ensure key is exactly 32 bytes for AES-256
+      const decipher = crypto.createDecipheriv('aes-256-ecb', key.slice(0, 32), Buffer.alloc(0));
+      decipher.setAutoPadding(true);
+      
       let decrypted = decipher.update(encrypted, 'base64', 'utf8');
       decrypted += decipher.final('utf8');
+      
       return decrypted;
     } catch (error) {
+      console.error('Decryption error details:', error);
       throw new Error(`Decryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
