@@ -5,6 +5,7 @@ import ondcRoutes from './routes';
 import 'dotenv/config';
 import { createAuthorizationHeader } from './utility';
 import { ondcRegistrationController } from './controllers/ondcRegistrationController';
+import { subscriptionController } from './controllers/SubscriptionController';
 
 interface AuthHeaderRequest {
     body: any;
@@ -68,6 +69,9 @@ app.get('/', (req, res) => {
 
 app.get('/ondc-site-verification.html', ondcRegistrationController.siteVerification);
 
+app.post('/on_subscribe', (req, res) => {
+    subscriptionController.handleSubscription(req, res);
+  });
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
     console.error(err.stack);
