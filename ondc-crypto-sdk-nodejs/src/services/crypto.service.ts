@@ -2,42 +2,63 @@ import crypto from 'crypto';
 import { encryptionConfig } from '../types/index';
 
 export class CryptoService {
-  private sharedKey: Buffer;
+  private aesKey: Buffer;
 
   constructor() {
-    const privateKey = crypto.createPrivateKey({
-      key: Buffer.from(encryptionConfig.Encryption_Privatekey, 'base64'),
-      format: 'der',
-      type: 'pkcs8'
-    });
-
-    const publicKey = crypto.createPublicKey({
-      key: Buffer.from(encryptionConfig.Encryption_Publickey, 'base64'),
-      format: 'der',
-      type: 'spki'
-    });
-
-    this.sharedKey = crypto.diffieHellman({
+    // Validate key pair first
+    const { privateKey, publicKey } = this.validateKeyPair();
+    const sharedSecret = crypto.diffieHellman({
       privateKey,
-      publicKey
+      publicKey,
     });
+
+    // Key derivation using SHA-256
+    this.aesKey = crypto.createHash('sha256')
+      .update(sharedSecret)
+      .digest()
+      .subarray(0, 32); // Use first 32 bytes for AES-256
+  }
+
+  private validateKeyPair() {
+    try {
+      const privateKey = crypto.createPrivateKey({
+        key: Buffer.from(encryptionConfig.Encryption_Privatekey, 'base64'),
+        format: 'der',
+        type: 'pkcs8'
+      });
+
+      const publicKey = crypto.createPublicKey({
+        key: Buffer.from(encryptionConfig.Encryption_Publickey, 'base64'),
+        format: 'der',
+        type: 'spki'
+      });
+
+      return { privateKey, publicKey };
+    } catch (error) {
+      throw new Error(`Invalid key pair: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
 
   decryptAES256ECB(encrypted: string): string {
     try {
-      console.log('Shared Key:', this.sharedKey);
-      console.log('Encrypted Data:', encrypted);
-      const decipher = crypto.createDecipheriv('aes-256-ecb', this.sharedKey, null); // null IV for ECB Mode
-      decipher.setAutoPadding(true);
-      console.log('Decipher:', decipher);
+      // Validate input
+      if (!encrypted || typeof encrypted !== 'string') {
+        throw new Error('Invalid encrypted data format');
+      }
+
+      const decipher = crypto.createDecipheriv('aes-256-ecb', this.aesKey, null);
+      decipher.setAutoPadding(true); // Enable automatic padding removal
       
       let decrypted = decipher.update(encrypted, 'base64', 'utf8');
       decrypted += decipher.final('utf8');
-      console.log('Decrypted Data:', decrypted);
       
       return decrypted;
     } catch (error) {
-      console.error('Decryption error details:', error);
+      console.error('Decryption failed:', {
+        error: error instanceof Error ? error.message : 'Unknown',
+        encryptedInput: encrypted,
+        aesKeyLength: this.aesKey.length
+      });
       throw new Error(`Decryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
