@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import ondcRoutes from './routes';
+// import ondcRoutes from './routes';
 import 'dotenv/config';
 import { createAuthorizationHeader } from './utility';
 import { ondcRegistrationController } from './controllers/ondcRegistrationController';

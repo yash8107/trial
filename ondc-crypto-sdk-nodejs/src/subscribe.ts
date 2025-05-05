@@ -42,7 +42,7 @@ const formattedTimestamp = currentTime.toISOString(); // This gives "2023-10-05T
                     country: "IND",
                     subscriber_id: SUBSCRIBER_ID,
                     unique_key_id: UNIQUE_KEY_ID,
-                    callback_url: "/ondc/onboarding",
+                    callback_url: "/",
                     key_pair: {
                         signing_public_key: "k/3PPSC63BVCUmuZx1Swhl0TD+hWYikEpV0rUMAtO+8=",
                         encryption_public_key: "MCowBQYDK2VuAyEA817tuDx8zi+WCwJpOVZmvgXOLoFmEftyEoFMB0VQQhQ=",
