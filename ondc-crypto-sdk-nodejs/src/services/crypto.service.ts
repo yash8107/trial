@@ -1,5 +1,6 @@
 import sodium from 'libsodium-wrappers';
 import { encryptionConfig } from '../types/index';
+import * as crypto from 'crypto';
 
 export class CryptoService {
   private encryptionPrivateKey: string;
@@ -14,7 +15,8 @@ export class CryptoService {
     console.log('Encrypted challenge:', encryptedChallenge);
     await sodium.ready;
 
-    const privateKeyRaw = sodium.from_base64(this.encryptionPrivateKey, sodium.base64_variants.ORIGINAL);
+    // ⛏️ Convert DER base64 private key → 32-byte raw key
+    const privateKeyRaw = this.extractRawPrivateKeyFromDER(this.encryptionPrivateKey);
     const publicKeyRaw = sodium.from_base64(this.encryptionPublicKey, sodium.base64_variants.ORIGINAL);
 
     console.log('Private key:', privateKeyRaw);
@@ -37,5 +39,18 @@ export class CryptoService {
     }
     console.log('Decrypted string:', sodium.to_string(decrypted));
     return sodium.to_string(decrypted);
+  }
+
+  extractRawPrivateKeyFromDER(base64Key: string): Uint8Array {
+    const derBuffer = Buffer.from(base64Key, 'base64');
+  
+    const privateKeyObj = crypto.createPrivateKey({
+      key: derBuffer,
+      format: 'der',
+      type: 'pkcs8',
+    });
+  
+    const rawKey = privateKeyObj.export({ format: 'der', type: 'pkcs8' });
+    return new Uint8Array(rawKey.slice(-32)); // last 32 bytes are the raw key
   }
 }
