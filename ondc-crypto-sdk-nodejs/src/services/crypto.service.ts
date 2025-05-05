@@ -17,7 +17,7 @@ export class CryptoService {
 
     // ⛏️ Convert DER base64 private key → 32-byte raw key
     const privateKeyRaw = this.extractRawPrivateKeyFromDER(this.encryptionPrivateKey);
-    const publicKeyRaw = sodium.from_base64(this.encryptionPublicKey, sodium.base64_variants.ORIGINAL);
+    const publicKeyRaw = this.extractRawPublicKeyFromDER(this.encryptionPublicKey);
 
     console.log('Private key:', privateKeyRaw);
     console.log('Public key:', publicKeyRaw);
@@ -52,5 +52,18 @@ export class CryptoService {
   
     const rawKey = privateKeyObj.export({ format: 'der', type: 'pkcs8' });
     return new Uint8Array(rawKey.slice(-32)); // last 32 bytes are the raw key
+  }
+
+  extractRawPublicKeyFromDER(base64Key: string): Uint8Array {
+    const derBuffer = Buffer.from(base64Key, 'base64');
+  
+    const publicKeyObj = crypto.createPublicKey({
+      key: derBuffer,
+      format: 'der',
+      type: 'spki',
+    });
+  
+    const rawKey = publicKeyObj.export({ format: 'der', type: 'spki' });
+    return new Uint8Array(rawKey.slice(-32)); // last 32 bytes are raw
   }
 }
