@@ -1,93 +1,41 @@
-// src/services/crypto.service.ts
-import crypto from 'crypto';
+import sodium from 'libsodium-wrappers';
 import { encryptionConfig } from '../types/index';
-import _sodium from 'libsodium-wrappers';
 
 export class CryptoService {
-  private aesKey: Buffer;
+  private encryptionPrivateKey: string;
+  private encryptionPublicKey: string;
 
   constructor() {
-    const { privateKey, publicKey } = this.validateKeyPair();
-    const sharedSecret = this.deriveSharedSecret(privateKey, publicKey);
-    this.aesKey = this.deriveAESKey(sharedSecret);
+    this.encryptionPrivateKey = encryptionConfig.Encryption_Privatekey;
+    this.encryptionPublicKey = encryptionConfig.Encryption_Publickey;
   }
 
-  private validateKeyPair() {
-    try {
-      // Verify private key format
-      const privateKey = crypto.createPrivateKey({
-        key: Buffer.from(encryptionConfig.Encryption_Privatekey, 'base64'),
-        format: 'der',
-        type: 'pkcs8'
-      });
+  async decryptChallenge(encryptedChallenge: string): Promise<string> {
+    console.log('Encrypted challenge:', encryptedChallenge);
+    await sodium.ready;
 
-      // Verify public key matches private key
-      const generatedPublic = crypto.createPublicKey(privateKey)
-        .export({ format: 'der', type: 'spki' })
-        .toString('base64');
+    const privateKeyRaw = sodium.from_base64(this.encryptionPrivateKey, sodium.base64_variants.ORIGINAL);
+    const publicKeyRaw = sodium.from_base64(this.encryptionPublicKey, sodium.base64_variants.ORIGINAL);
 
-      if (generatedPublic !== encryptionConfig.Encryption_Publickey) {
-        throw new Error('Public key does not match private key');
-      }
+    console.log('Private key:', privateKeyRaw);
+    console.log('Public key:', publicKeyRaw);
 
-      return {
-        privateKey,
-        publicKey: crypto.createPublicKey({
-          key: Buffer.from(encryptionConfig.Encryption_Publickey, 'base64'),
-          format: 'der',
-          type: 'spki'
-        })
-      };
-    } catch (error) {
-      throw new Error(`Key validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    // Must be 32 bytes each
+    if (privateKeyRaw.length !== 32 || publicKeyRaw.length !== 32) {
+      throw new Error('Encryption key must be 32 bytes (raw X25519 key)');
     }
-  }
 
-  private deriveSharedSecret(privateKey: crypto.KeyObject, publicKey: crypto.KeyObject): Buffer {
-    return crypto.diffieHellman({
-      privateKey,
-      publicKey,
-    });
-  }
-
-  private deriveAESKey(sharedSecret: Buffer): Buffer {
-    return crypto.createHash('sha256')
-      .update(sharedSecret)
-      .digest()
-      .subarray(0, 32); // Use first 32 bytes for AES-256
-  }
-
-  decryptAES256ECB(encrypted: string): string {
-    try {
-      if (!encrypted || typeof encrypted !== 'string') {
-        throw new Error('Invalid encrypted data format');
-      }
-
-      const decipher = crypto.createDecipheriv('aes-256-ecb', this.aesKey, Buffer.alloc(0));
-      decipher.setAutoPadding(true); // Handle padding manually
-
-      let decrypted = decipher.update(encrypted, 'base64', 'utf8');
-      decrypted += decipher.final('utf8');
-      console.log('Decrypted data:', decrypted);
-      return decrypted;
-    } catch (error) {
-      console.error('Decryption failed:', {
-        aesKey: this.aesKey.toString('base64'),
-        encryptedInput: encrypted,
-        error: error instanceof Error ? error.message : 'Unknown'
-      });
-      throw new Error(`Decryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
-
-  // Add signing functionality from reference code
-  async signMessage(message: string): Promise<string> {
-    await _sodium.ready;
-    const sodium = _sodium;
-    const signedMessage = sodium.crypto_sign_detached(
-      message,
-      sodium.from_base64(encryptionConfig.Signing_private_key, sodium.base64_variants.ORIGINAL)
+    const decrypted = sodium.crypto_box_seal_open(
+      sodium.from_base64(encryptedChallenge, sodium.base64_variants.ORIGINAL),
+      publicKeyRaw,
+      privateKeyRaw
     );
-    return sodium.to_base64(signedMessage, sodium.base64_variants.ORIGINAL);
+
+    console.log('Decrypted:', decrypted);
+    if (!decrypted) {
+      throw new Error('Failed to decrypt challenge');
+    }
+    console.log('Decrypted string:', sodium.to_string(decrypted));
+    return sodium.to_string(decrypted);
   }
 }
