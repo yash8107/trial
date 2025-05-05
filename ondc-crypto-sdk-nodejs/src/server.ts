@@ -1,5 +1,10 @@
 import express, { Request, Response } from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import ondcRoutes from './routes';
+import 'dotenv/config';
 import { createAuthorizationHeader } from './utility';
+import { ondcRegistrationController } from './controllers/ondcRegistrationController';
 
 interface AuthHeaderRequest {
     body: any;
@@ -10,6 +15,8 @@ interface AuthHeaderRequest {
 }
 
 const app = express();
+app.use(cors());
+app.use(helmet());
 app.use(express.json());
 
 app.post('/generate-auth-header', async (req: Request<{}, {}, AuthHeaderRequest>, res: Response) => {
@@ -53,6 +60,19 @@ app.post('/generate-auth-header', async (req: Request<{}, {}, AuthHeaderRequest>
         });
     }
 });
+
+// Root route
+app.get('/', (req, res) => {
+    res.send("Hello World");
+});
+
+app.get('/ondc-site-verification.html', ondcRegistrationController.siteVerification);
+
+// Error handling middleware
+app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+  });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
