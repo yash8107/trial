@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { createAuthorizationHeader } from './utility';
-import { encryptionConfig } from '../types/index';
+import { encryptionConfig } from './types/index';
 
 // Your private key - replace this with your actual private key
 const PRIVATE_KEY = encryptionConfig.Signing_private_key;
