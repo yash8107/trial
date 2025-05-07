@@ -103,6 +103,7 @@ export interface EncryptionKeys {
   valid_until: string;
   Request_Id: string;
   ondc_public_key: string;
+  subscriber_id: string;
 }
 
 // export const encryptionConfig: EncryptionKeys = {
@@ -136,5 +137,6 @@ export const encryptionConfig: EncryptionKeys = {
   valid_from: '2025-05-07T16:02:42.240Z',
   valid_until: '2026-05-07T16:02:42.241Z',
   Request_Id: 'fdd4c1fc-dbd5-4db7-b1f2-524c72c816c9',
-  ondc_public_key: 'MCowBQYDK2VuAyEAduMuZgmtpjdCuxv+Nc49K0cB6tL/Dj3HZetvVN7ZekM='
+  ondc_public_key: 'MCowBQYDK2VuAyEAduMuZgmtpjdCuxv+Nc49K0cB6tL/Dj3HZetvVN7ZekM=',
+  subscriber_id: 'msn.api.sellerfocus.xyz'
 };

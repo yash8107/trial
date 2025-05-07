@@ -4,7 +4,7 @@ import { encryptionConfig } from './types/index';
 
 // Your private key - replace this with your actual private key
 const PRIVATE_KEY = encryptionConfig.Signing_private_key;
-const SUBSCRIBER_ID = "api.sellerfocus.xyz";
+const SUBSCRIBER_ID = encryptionConfig.subscriber_id;
 const UNIQUE_KEY_ID = encryptionConfig.unique_key_id;
 
 async function createSubscriptionRequest() {
