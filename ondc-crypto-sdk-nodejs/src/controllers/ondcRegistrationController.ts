@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import sodium from 'libsodium-wrappers';
+import { encryptionConfig } from '../types/index';
 
 export class OndcRegistrationController {
   async siteVerification(req: Request, res: Response) {
@@ -7,14 +8,14 @@ export class OndcRegistrationController {
       console.log('Site Verification Endpoint Called');
 
       // Load keys from environment variables
-      const signingPrivateKey = '9sfCszmFVgrlzdxED3tfPtohk9FkcspnnooySJ8RxIBDWIdGg48zK4MM4Yq8gDwa5RbUZiXzAPQQ2LCiyXGBEQ==';
+      const signingPrivateKey = encryptionConfig.Signing_private_key;
 
       if (!signingPrivateKey) {
         throw new Error('No signing private key found. Generate keys first.');
       }
 
       // Generate a unique request ID
-      const requestId = "bb2de03a-bda1-458f-b27b-6919788da886";
+      const requestId = encryptionConfig.Request_Id;
 
       // Wait for sodium to be ready
       await sodium.ready;

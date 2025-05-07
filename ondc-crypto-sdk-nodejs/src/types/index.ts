@@ -115,14 +115,26 @@ export interface EncryptionKeys {
 //   valid_until: '2026-05-05T13:11:13.021Z'
 // };
 
+// export const encryptionConfig: EncryptionKeys = {
+//   unique_key_id: 'bb2de03a-bda1-458f-b27b-6919788da886',
+//   Signing_private_key: '9sfCszmFVgrlzdxED3tfPtohk9FkcspnnooySJ8RxIBDWIdGg48zK4MM4Yq8gDwa5RbUZiXzAPQQ2LCiyXGBEQ==',
+//   Signing_public_key: 'Q1iHRoOPMyuDDOGKvIA8GuUW1GYl8wD0ENiwoslxgRE=',
+//   Encryption_Privatekey: 'MC4CAQAwBQYDK2VuBCIEIJCidZJ8WBezDoz145R0r8NL61U9XOSdDG5Vz5RZ62BC',
+//   Encryption_Publickey: 'MCowBQYDK2VuAyEAbg59g4rH4ppMce1Oy4874F4QxdzdKygZh6jlDo12xUE=',
+//   valid_from: '2025-05-05T20:16:59.764Z',
+//   valid_until: '2026-05-05T20:16:59.764Z',
+//   Request_Id: 'bb2de03a-bda1-458f-b27b-6919788da886',
+//   ondc_public_key: 'MCowBQYDK2VuAyEAduMuZgmtpjdCuxv+Nc49K0cB6tL/Dj3HZetvVN7ZekM='
+// };
+
 export const encryptionConfig: EncryptionKeys = {
-  unique_key_id: 'bb2de03a-bda1-458f-b27b-6919788da886',
-  Signing_private_key: '9sfCszmFVgrlzdxED3tfPtohk9FkcspnnooySJ8RxIBDWIdGg48zK4MM4Yq8gDwa5RbUZiXzAPQQ2LCiyXGBEQ==',
-  Signing_public_key: 'Q1iHRoOPMyuDDOGKvIA8GuUW1GYl8wD0ENiwoslxgRE=',
-  Encryption_Privatekey: 'MC4CAQAwBQYDK2VuBCIEIJCidZJ8WBezDoz145R0r8NL61U9XOSdDG5Vz5RZ62BC',
-  Encryption_Publickey: 'MCowBQYDK2VuAyEAbg59g4rH4ppMce1Oy4874F4QxdzdKygZh6jlDo12xUE=',
-  valid_from: '2025-05-05T20:16:59.764Z',
-  valid_until: '2026-05-05T20:16:59.764Z',
-  Request_Id: 'bb2de03a-bda1-458f-b27b-6919788da886',
+  unique_key_id: 'fdd4c1fc-dbd5-4db7-b1f2-524c72c816c9',
+  Signing_private_key: 'wvLarmTpYZPKbGnG+p7Oj7pSpL1LObpVIWRcq1T0X+QCXH9/aBSKwl9bTmNpxQ0xxMjwmec/AOWBlrF3NRE5wg==',
+  Signing_public_key: 'Alx/f2gUisJfW05jacUNMcTI8JnnPwDlgZaxdzUROcI=',
+  Encryption_Privatekey: 'MC4CAQAwBQYDK2VuBCIEIFBQuBlH0gnr3YjqDUt24oQyjzK0wL6ccDp9SnpoEf5g',
+  Encryption_Publickey: 'MCowBQYDK2VuAyEAHFRN6647p1BwblTRhnSbLQ/vA2vIqb4uFzz0jaGvuyk=',
+  valid_from: '2025-05-07T16:02:42.240Z',
+  valid_until: '2026-05-07T16:02:42.241Z',
+  Request_Id: 'fdd4c1fc-dbd5-4db7-b1f2-524c72c816c9',
   ondc_public_key: 'MCowBQYDK2VuAyEAduMuZgmtpjdCuxv+Nc49K0cB6tL/Dj3HZetvVN7ZekM='
 };

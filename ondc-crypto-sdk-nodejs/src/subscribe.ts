@@ -1,10 +1,11 @@
 import axios from 'axios';
 import { createAuthorizationHeader } from './utility';
+import { encryptionConfig } from './types/index';
 
 // Your private key - replace this with your actual private key
-const PRIVATE_KEY = "9sfCszmFVgrlzdxED3tfPtohk9FkcspnnooySJ8RxIBDWIdGg48zK4MM4Yq8gDwa5RbUZiXzAPQQ2LCiyXGBEQ==";
+const PRIVATE_KEY = encryptionConfig.Signing_private_key;
 const SUBSCRIBER_ID = "api.sellerfocus.xyz";
-const UNIQUE_KEY_ID = "bb2de03a-bda1-458f-b27b-6919788da886";
+const UNIQUE_KEY_ID = encryptionConfig.unique_key_id;
 
 async function createSubscriptionRequest() {
     try {
@@ -43,8 +44,8 @@ const formattedTimestamp = currentTime.toISOString(); // This gives "2023-10-05T
                     unique_key_id: UNIQUE_KEY_ID,
                     callback_url: "/",
                     key_pair: {
-                        signing_public_key: "Q1iHRoOPMyuDDOGKvIA8GuUW1GYl8wD0ENiwoslxgRE=",
-                        encryption_public_key: "MCowBQYDK2VuAyEAbg59g4rH4ppMce1Oy4874F4QxdzdKygZh6jlDo12xUE=",
+                        signing_public_key: encryptionConfig.Signing_public_key,
+                        encryption_public_key: encryptionConfig.Encryption_Publickey,
                         valid_from: new Date().toISOString(), 
                         valid_until: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
                     }
