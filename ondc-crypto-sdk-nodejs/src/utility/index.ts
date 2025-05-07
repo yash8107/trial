@@ -18,7 +18,8 @@ export const createSigningString = async ({ message, created, expires }: ICreate
 
   await sodium.ready; // Use the imported default instance
 
-  const digest = sodium.crypto_generichash(64, sodium.from_string(JSON.stringify(message)));
+  const inputString = typeof message === 'string' ? message : JSON.stringify(message);
+  const digest = sodium.crypto_generichash(64, sodium.from_string(inputString));
   const digestBase64 = sodium.to_base64(digest, sodium.base64_variants.ORIGINAL);
 
   const signingString = `(created): ${created}

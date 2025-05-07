@@ -13,7 +13,7 @@ async function lookupRequest() {
         const requestBody = {
             "subscriber_id": encryptionConfig.subscriber_id,
             "country": "IND",
-            "ukId": encryptionConfig.unique_key_id,
+            // "ukid": encryptionConfig.unique_key_id,
             "city": "std:080",
             "domain": "ONDC:RET11",
             "type": "BPP"
