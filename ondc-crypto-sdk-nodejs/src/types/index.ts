@@ -101,6 +101,8 @@ export interface EncryptionKeys {
   Encryption_Publickey: string;
   valid_from: string;
   valid_until: string;
+  Request_Id: string;
+  ondc_public_key: string;
 }
 
 // export const encryptionConfig: EncryptionKeys = {
@@ -120,5 +122,7 @@ export const encryptionConfig: EncryptionKeys = {
   Encryption_Privatekey: 'MC4CAQAwBQYDK2VuBCIEIJCidZJ8WBezDoz145R0r8NL61U9XOSdDG5Vz5RZ62BC',
   Encryption_Publickey: 'MCowBQYDK2VuAyEAbg59g4rH4ppMce1Oy4874F4QxdzdKygZh6jlDo12xUE=',
   valid_from: '2025-05-05T20:16:59.764Z',
-  valid_until: '2026-05-05T20:16:59.764Z'
+  valid_until: '2026-05-05T20:16:59.764Z',
+  Request_Id: 'bb2de03a-bda1-458f-b27b-6919788da886',
+  ondc_public_key: 'MCowBQYDK2VuAyEAduMuZgmtpjdCuxv+Nc49K0cB6tL/Dj3HZetvVN7ZekM='
 };
